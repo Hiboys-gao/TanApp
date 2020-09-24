@@ -16,6 +16,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from UserApp import views
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # User接口：
+    path('api/user/vcode/fetch/', views.fetchVcode),
+    path('api/user/vcode/submit/', views.submitVcode),
+    path('api/user/profile/show/', views.showProfile),
+    path('api/user/profile/update/', views.updateProfile),
+
 ]
