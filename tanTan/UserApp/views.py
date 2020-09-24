@@ -3,7 +3,9 @@ from django.core.cache import cache
 
 # Create your views here.
 from UserApp.logics import send_vcode
-from UserApp.models import Users
+from UserApp.models import Users, Profile
+from tanTan.forms import UsersForm
+from tanTan.forms import ProfileForm
 
 
 # 发送手机短信验证码
@@ -38,10 +40,23 @@ def submitVcode(request):
     return JsonResponse(data=data)
 
 
+# 查看个人资料
 def showProfile(request):
-
-    return HttpResponse('登录成功')
+    uid = request.session.get('uid')
+    profile, create = Profile.objects.get_or_create(id=uid)
+    return JsonResponse(data={'code': 0, 'data': profile.to_dict()})
 
 
 def updateProfile(request):
-    return None
+    user_form = UsersForm(request.POST)
+    profile_form = ProfileForm(request.POST)
+    if user_form.is_valid() and profile_form.is_valid():
+        uid = request.session['uid']
+        Users.objects.update_or_create(id=uid,defaults=user_form.cleaned_data)
+        Profile.objects.update_or_create(id=uid,defaults=profile_form.cleaned_data)
+        return JsonResponse(data={'code': 0, 'data': None})
+    else:
+        err = {}
+        err.update(user_form.errors)
+        err.update(profile_form.errors)
+        return JsonResponse(data={'code': 1003, 'data': err})
